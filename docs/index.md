@@ -3,9 +3,9 @@
 layout: home
 
 hero:
-  name: "TODO: Title"
-  text: "TODO: Subtitle"
-  tagline: "TODO: Tagline"
+  name: "Jacky Chen"
+  text: "Undergraduate @ MIT"
+  tagline: "6-3"
   actions:
     - theme: brand
       text: Template Repository
