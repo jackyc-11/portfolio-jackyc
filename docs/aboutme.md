@@ -15,4 +15,4 @@ layout: doc
 | From | New York |
 | Looking Forward To | Full Stack Web Dev Skills |
 
-![Image of Me](C:/Users/jacky/OneDrive/Desktop/Junior/6.1040/portfolio-jackyc/assets/images/headshot.jpg){"width"="300", "height"="300"}
+![Image of Me](headshot.jpg){"width"="300", "height"="300"}
