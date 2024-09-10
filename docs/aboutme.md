@@ -2,11 +2,6 @@
 layout: doc
 ---
 
-
-<script setup>
-  import { withBase } from 'vitepress';
-</script>
-
 # About Me
 
 | Name | Jacky |
