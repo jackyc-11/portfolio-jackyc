@@ -10,13 +10,7 @@ layout: doc
 [Deployed Service (Vercel)](https://tether1040.vercel.app/)
 
 ## Concepts
-1) **Authenticating**
-
-*Purpose:* <br>
-Authenticate users so that app users correspond to people.
-
-*Operational Principle:* <br>
-After a user registers with a username and password pair, they can authenticate as that user by providing the same pair of username and password.
+**Authenticating**
 
 *State:*
 ```
@@ -24,22 +18,7 @@ registered: set User
 username, password: registered -> one String
 ```
 
-*Actions:*
-```
-register(name, pass: String, out user: User):
-    if (name, pass) not in registered:
-        registered += new User(name, pass)
-authenticate(name, pass: String, out user: User):
-    user = {u ∈ registered | u.username = name ∧ u.password = pass}
-```
-
-2) **Sessioning**
-
-*Purpose:* <br>
-Enable authenticated actions for an extended period of time.
-
-*Operational Principle:* <br>
-After a session starts and before it ends (manually ended or automatically timed out), the getUser action returns the user identified at the start.
+**Sessioning [User]**
 
 *State:*
 ```
@@ -47,143 +26,63 @@ active: set Session
 user: active -> one User
 ```
 
-*Actions:*
-```
-start(user: User, out sess: Session):
-    active += new Session(user)
-getuser(sess: Session, out user: User):
-    user = user(sess)
-end(sess: Session):
-    active = active \ {sess}
-```
-
-3) **Texting**
-
-*Purpose:* <br>
-Enable users to send and receive textual messages.
-
-*Operational Principle:* <br>
-After a user sends a message to another user, the recipient can read the message.
+**Texting [User, Message]**
 
 *State:*
 ```
 messages: set Message
 sender, recipient: messages -> one User
 content: messages -> one String
-timestamp: messages -> one Time
 ```
 
-*Actions:*
-```
-send(sender: User, recipient: User, content: String, out message: Message):
-    messages += new Message(sender, recipient, content, currentTime())
-receive(recipient: User, sender: User, out message: Message):
-    message = {m ∈ messages | m.recipient = recipient ∧ m.sender = sender}
-```
-
-4) **Video Calling**
-
-*Purpose:* <br>
-Allow users to engage in real-time video communication.
-
-*Operational Principle:* <br>
-When a user initiates a video call and the recipient accepts, both users (caller and recipient) can see and hear each other until one of them ends the call.
+**Video Calling [User, Call]**
 
 *State:*
 ```
 activeCalls: set Call
 caller, recipient: activeCalls -> one User
-startTime, endTime: activeCalls -> one Time
+status: activeCalls -> one String
 ```
 
-*Actions:*
-```
-startCall(caller: User, recipient: User, out call: Call):
-    activeCalls += new Call(caller, recipient, currentTime())
-endCall(call: Call):
-    call.endTime := currentTime()
-```
-
-5) **Mood Mapping**
-
-*Purpose:* <br>
-Allow users to set and display a status or emotional state.
-
-*Operational Principle:* <br>
-Users can select an emoji to represent their mood or status, which will be displayed to the chat until updated or removed.
+**Mood Mapping [User, Mood]**
 
 *State:*
 ```
 moods: set Mood
-user: moods -> one User
+mood: moods -> one String
+user, recipient: moods -> one User
 ```
 
-*Actions:*
-```
-setMood(user: User, out mood: Mood):
-    if user ∈ moods:
-        moods(user).mood := mood
-    else:
-        moods += new Mood(user, mood)
-removeMood(user: User):
-    moods = moods \ {mood | mood.user = user}
-```
-
-6) **Post-It Walling**
-
-*Purpose:* <br>
-Allow users to create and display short posts on a virtual wall.
-
-*Operational Principle:* <br>
-Users can post notes or messages on their wall, and these posts remain visible until they are removed by the user.
+**Posting [User]**
 
 *State:*
 ```
 posts: set Post
-author: posts -> one User
+author, recipient: posts -> one User
 content: posts -> one String
 ```
 
-*Actions:*
-```
-createPost(author: User, content: String, out post: Post):
-    posts += new Post(author, content)
-deletePost(post: Post):
-    posts = posts \ {post}
-viewWall(user: User, out posts: set Post):
-    posts = {p ∈ posts | p.author = user}
-```
-
-7) **Friending**
-
-*Purpose:* <br>
-Allow users to establish connections with other users, forming a mutual friendship.
-
-*Operational Principle:* <br>
-A user can send a friend request to another user. If accepted, the two users become friends, allowing them to interact with different features in the app.
+**Friending [User]**
 
 *State:*
 ```
 friends: set Friendship
+requests: set Request
 user1, user2: friends -> one User
-pendingRequests: set Request
-sender, recipient: pendingRequests -> one User
+from, to: requests -> one User
+status: requests -> one String
 ```
 
-*Actions:*
-```
-sendFriendRequest(sender: User, recipient: User, out request: Request):
-    pendingRequests += new Request(sender, recipient)
-acceptFriendRequest(request: Request, out friendship: Friendship):
-    pendingRequests = pendingRequests \ {request}
-    friends += new Friendship(request.sender, request.recipient)
-rejectFriendRequest(request: Request):
-    pendingRequests = pendingRequests \ {request}
-removeFriend(friendship: Friendship):
-    friends = friends \ {friendship}
-```
+**Weathering [User, Weather]**
 
-**Other Potential Concepts:** What's Cooking, Counting Down, Weather Tracking
+*State:*
+```
+shares: set WeatherShare
+user: shares -> one User
+agreed: shares -> one Boolean
+city: shares -> optional String
+state: shares -> optional String
+```
 
 ## Global Data Model
 ```
@@ -192,11 +91,20 @@ app Tether
 include Authenticating as Auth
 let User = Auth.User
 include Sessioning[User]
-include Texting [User, Message]
-include MoodMapping[User]
 include Friending[User]
-inclue VideoCalling[User, Call]
+include Posting[User]
+include Texting [User, Message]
+include MoodMapping[User, Mood]
+include VideoCalling[User, Call]
+include Weathering[User, Weather]
 ```
 
 ## Data Diagram
-![](a4_media_files\data_diagram.jpg)
+![](a4_media_files\data_diagram2.jpg)
+
+## Design Reflection
+For the Mood Mapping concept, I was initially planning to explore an emoji API that would display a dropdown or picker from which users could select their moods. However, I ultimately chose to simplify the implementation by allowing the mood to be a string restricted by a regex to only allow emoji inputs. The motivation behind this decision is that modern smartphone and desktop keyboards already have built-in emoji functionality, making it easy for users to input emojis directly. A simple alternative I considered was using a predefined set of emojis but rejected this option as it limited the expressiveness of users. Additionally, mood doesn't just mean facial emojis; I wanted to allow users to express more than just their feelings, from activity to food to anything that can be expressed by an emoji.
+
+For the Video Calling concept, I initially had a reject call and end call action. The reject call action is to deny an incoming call, and the end call action is to terminate an ongoing call. I was thinking if there's really a difference between the two since if a user sends someone a call, the recipient can "reject" or "end" the call, both of which terminates the call. I decided to just omit the reject call action since I felt it was redundant.
+
+For the Weathering concept, the idea was to use APIs to get user location, which would then be used to get the weather. The hope was to use the API to access the client IP for location access, but Vercel intentionally blocks the client IP to prevent spoofing, so the location API always returns Virginia where the Vercel servers are hosted. I chose to go with a less convenient way to get the location (city and state) via manual input. The location is then fed to the weather API. Furthermore, there were privacy concerns over users using other users' locations nefariously. As a result, I integrated a Turn on Share action as a no-use option for users who feel uncomfortable sharing their location.
