@@ -72,6 +72,8 @@ After a long day at work or school, many people turn to social media to connect 
 **Color Palettes:**
 
 ![](a5_media_files\colorstudy.png)
+[--------------------------------------------------------------------------------------------]
+![](a5_media_files\mypalette.png)
 
 **Font Families:**
 
